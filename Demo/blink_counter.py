@@ -83,8 +83,9 @@ with mp_face_mesh.FaceMesh(max_num_faces = 1,
         else:
           if distance_landmarks_right>0.02:
             right_eye_open = True
-            
-    image = cv.resize(image, (500, 500), fx=1, fy=1, interpolation=cv.INTER_CUBIC)
+    width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH)/2)
+    height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT)/2)
+    image = cv.resize(image, (width, height), interpolation=cv.INTER_CUBIC)
     cv.putText(image, "Left eye: " + str(left_eye_counter), (10,50), cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 255, 0), 2)
     cv.putText(image, "Right eye: " + str(right_eye_counter), (10,100), cv.FONT_HERSHEY_COMPLEX, 1.0, (0, 0, 255), 2)
     
