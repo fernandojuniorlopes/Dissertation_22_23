@@ -9,14 +9,14 @@ mp_face_mesh = mp.solutions.mediapipe.python.solutions.face_mesh
 
 #Left eye
 left_eye_open = True
-left_eye_top_landmark = 386
-left_eye_bot_landmark = 374
+left_eye_upper_landmark = 386
+left_eye_lower_landmark = 374
 left_eye_counter = 0
 
 #Right eye
 right_eye_open = True
-right_eye_top_landmark = 159
-right_eye_bot_landmark = 145
+right_eye_upper_landmark = 159
+right_eye_lower_landmark = 145
 right_eye_counter = 0
 
 #To calculate distance between points
@@ -44,7 +44,6 @@ with mp_face_mesh.FaceMesh(max_num_faces = 1,
       break
 
     image.flags.writeable = True
-    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
     results = face_mesh.process(image)
 
     if results.multi_face_landmarks:
@@ -64,22 +63,25 @@ with mp_face_mesh.FaceMesh(max_num_faces = 1,
           landmark_drawing_spec = None,
           connection_drawing_spec = mp_drawing_styles.get_default_face_mesh_contours_style())
       
+        distance_landmarks_left = euclideanDistance(face_landmarks.landmark[left_eye_upper_landmark], face_landmarks.landmark[left_eye_lower_landmark])
+        distance_landmarks_right = euclideanDistance(face_landmarks.landmark[right_eye_upper_landmark], face_landmarks.landmark[right_eye_lower_landmark])
+        
         if left_eye_open:
-          if (euclideanDistance(face_landmarks.landmark[left_eye_top_landmark], face_landmarks.landmark[left_eye_bot_landmark])<=0.01):
+          if distance_landmarks_left<=0.02:
             #print("LEFT EYE BLINKED")
             left_eye_open = False
             left_eye_counter+=1
         else:
-          if (euclideanDistance(face_landmarks.landmark[left_eye_top_landmark], face_landmarks.landmark[left_eye_bot_landmark])>0.01):
+          if distance_landmarks_left>0.02:
             left_eye_open = True
 
         if right_eye_open:
-          if (euclideanDistance(face_landmarks.landmark[right_eye_top_landmark], face_landmarks.landmark[right_eye_bot_landmark])<=0.01):
+          if distance_landmarks_right<=0.02:
             #print("RIGHT EYE BLINKED")
             right_eye_open = False
             right_eye_counter+=1
         else:
-          if (euclideanDistance(face_landmarks.landmark[right_eye_top_landmark], face_landmarks.landmark[right_eye_bot_landmark])>0.01):
+          if distance_landmarks_right>0.02:
             right_eye_open = True
             
     image = cv.resize(image, (500, 500), fx=1, fy=1, interpolation=cv.INTER_CUBIC)
