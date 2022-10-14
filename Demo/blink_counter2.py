@@ -12,7 +12,7 @@ import sys
 
 mp_drawing = mp.solutions.mediapipe.python.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.mediapipe.python.solutions.drawing_styles
-mp_face_mesh = mp.solutions.mediapipe.python.solutions.face_mesh
+mp_holistic = mp.solutions.mediapipe.python.solutions.holistic
 
 #Left eye
 left_eye_open = True
@@ -21,7 +21,8 @@ left_eye_lower_landmark = 374
 left_eye_counter = 0
 
 LEFT_EYE =[ 362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385,384, 398 ]
-RIGHT_EYE=[ 33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161 , 246 ]  
+RIGHT_EYE=[ 33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161 , 246 ]
+
 
 #Right eye
 right_eye_open = True
@@ -30,7 +31,8 @@ right_eye_lower_landmark = 145
 right_eye_counter = 0
 
 #Value that work best with webcam and video
-eyes_closed_threshold = 6.5
+eyes_closed_threshold = 6.6
+fingers_threshold = 8
 
 frame_counter = 0
 if len(sys.argv) == 1:
@@ -43,10 +45,9 @@ example1 = "data/blink.mp4"
 
 # landmark detection function 
 def landmarksDetection(img_width, img_height, results):
-    mesh_coord = [(int(point.x * img_width), int(point.y * img_height)) for point in results.multi_face_landmarks[0].landmark]
-    
+    coords = [(int(point.x * img_width), int(point.y * img_height)) for point in results.landmark]
     # returning the list of tuples for each landmark
-    return mesh_coord
+    return coords
 
 #To calculate distance between points
 def euclideanDistance(point, point1):
@@ -64,8 +65,8 @@ if not cap.isOpened():
 width = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
 height = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 
-with mp_face_mesh.FaceMesh(max_num_faces = 1,
-  refine_landmarks=True,
+with mp_holistic.Holistic(
+  refine_face_landmarks=True,
   min_detection_confidence = 0.5,
   min_tracking_confidence = 0.5) as face_mesh:
   start_time = time.time()
@@ -91,18 +92,18 @@ with mp_face_mesh.FaceMesh(max_num_faces = 1,
 
     # height, width = image.shape[:2]
 
-    if results.multi_face_landmarks:
+    if results.face_landmarks:
 
       #Normalization of the landmarks
-      mesh_coords = landmarksDetection(width, height, results)
+      face_coords = landmarksDetection(width, height, results.face_landmarks)
       
       #Drawing the landmarks
-      cv.polylines(image,  [np.array([mesh_coords[p] for p in LEFT_EYE ], dtype=np.int32)], True, (0,0,355), 1, cv.LINE_AA)
-      cv.polylines(image,  [np.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, (0,355,0), 1, cv.LINE_AA)
+      cv.polylines(image,  [np.array([face_coords[p] for p in LEFT_EYE ], dtype=np.int32)], True, (0,0,355), 1, cv.LINE_AA)
+      cv.polylines(image,  [np.array([face_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, (0,355,0), 1, cv.LINE_AA)
 
       #Calculating distance between top and bottom of the eye
-      distance_landmarks_left = euclideanDistance(mesh_coords[left_eye_upper_landmark], mesh_coords[left_eye_lower_landmark])
-      distance_landmarks_right = euclideanDistance(mesh_coords[right_eye_upper_landmark], mesh_coords[right_eye_lower_landmark])
+      distance_landmarks_left = euclideanDistance(face_coords[left_eye_upper_landmark], face_coords[left_eye_lower_landmark])
+      distance_landmarks_right = euclideanDistance(face_coords[right_eye_upper_landmark], face_coords[right_eye_lower_landmark])
       
       #State machine that counts the amount of times each eye closes
       if left_eye_open:
@@ -120,6 +121,33 @@ with mp_face_mesh.FaceMesh(max_num_faces = 1,
       else:
         if distance_landmarks_right>eyes_closed_threshold:
           right_eye_open = True
+    
+    if results.left_hand_landmarks:
+      left_hand_coords = landmarksDetection(width, height, results.left_hand_landmarks)
+      
+      mp_drawing.draw_landmarks(
+                image,
+                results.left_hand_landmarks,
+                mp_holistic.HAND_CONNECTIONS,
+                landmark_drawing_spec=None,
+                connection_drawing_spec=mp_drawing_styles
+                .get_default_hand_connections_style()) 
+
+      if euclideanDistance(left_hand_coords[8], left_hand_coords[4]) <= fingers_threshold:
+        left_eye_counter = 0
+    
+    if results.right_hand_landmarks:
+      right_hand_coords = landmarksDetection(width, height, results.right_hand_landmarks)
+      mp_drawing.draw_landmarks(
+                image,
+                results.right_hand_landmarks,
+                mp_holistic.HAND_CONNECTIONS,
+                landmark_drawing_spec=None,
+                connection_drawing_spec=mp_drawing_styles
+                .get_default_hand_connections_style()) 
+
+      if euclideanDistance(right_hand_coords[8], right_hand_coords[4]) <= fingers_threshold:
+        right_eye_counter = 0
 
     end_time = time.time() - start_time
 
