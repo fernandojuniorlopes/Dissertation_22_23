@@ -15,3 +15,9 @@
  - Leitura do artigo "Video-Based Facial Micro-Expression Analysis: A Survey of Datasets, Features and Algorithms" DOI: 10.1109/TPAMI.2021.3067464<br>
 <b>04/11/2022</b><br>
  - Pre-processamento de video<br>
+<b>11/11/2022</b><br>
+ - Estudo da framework deepFace<br>
+ - Estudo sobre micro vs macro expressões<br>
+<b>25/11/2022</b><br>
+ - Escrita do relatório sobre expressões, micro vs macro, relevância de micro expressões<br>
+

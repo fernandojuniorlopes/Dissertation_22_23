@@ -9,10 +9,22 @@ import numpy as np
 import utils
 import time
 import sys
+import datetime
+from influxdb_client import InfluxDBClient, Point, WritePrecision
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 mp_drawing = mp.solutions.mediapipe.python.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.mediapipe.python.solutions.drawing_styles
 mp_face_mesh = mp.solutions.mediapipe.python.solutions.face_mesh
+
+#Setup database
+token = "1mGTk2EGgI53t5b97pr7M2TNkcF05pXzKBqCFKAn0brkDTfFF9bnh-8wpYWwizRAeFAFakFERP_-7IypdV-OlA=="
+org = "influx_org"
+bucket = "influx_bucket"
+
+client = InfluxDBClient(url="http://localhost:8086", token=token)
+write_api = client.write_api(write_options=SYNCHRONOUS)
+data = []
 
 #Left eye
 left_eye_open = True
@@ -173,17 +185,22 @@ with mp_face_mesh.FaceMesh(max_num_faces = 1,
       cv.polylines(image,  [np.array([mesh_coords[p] for p in RIGHT_EYE ], dtype=np.int32)], True, (0,355,0), 1, cv.LINE_AA)
       
       image = face_align(mesh_coords,image)
+      for n, landmark in enumerate(mesh_coords):
+          if n in LEFT_EYE:
+            data.append(Point("mem").tag("Landmark", str(n)).field("x", round(landmark[0],2)).field("y", round(landmark[1],2)).field("Frame", frame_counter).field("Time", round(cap.get(cv.CAP_PROP_POS_MSEC))))
+
     
     end_time = time.time() - start_time
     fps = round(frame_counter/end_time,1)
-    
-    # cv.putText(image, "FPS: " + str(fps), (10, height-50), cv.FONT_HERSHEY_DUPLEX, 1.0, (0, 127, 0), 2)
+    write_api.write(bucket, org, data)
+    # cv.putText(image, "FPS: " + str(cap.get(cv.CAP_PROP_POS_MSEC)), (10, height-50), cv.FONT_HERSHEY_DUPLEX, 1.0, (0, 127, 0), 2)
     cv.imshow('Demo Blinking counter', image)
     
     if cv.waitKey(1) == ord('q'):
       break
+    if cv.waitKey(1) == ord('p'):
+        cv.waitKey(-1) #wait until any key is pressed
 
 # close the file
-f.close()
 cap.release()
 cv.destroyAllWindows
