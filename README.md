@@ -20,4 +20,19 @@
  - Estudo sobre micro vs macro expressões<br>
 <b>25/11/2022</b><br>
  - Escrita do relatório sobre expressões, micro vs macro, relevância de micro expressões<br>
-
+ <b>02/12/2022</b><br>
+ - Testes de landmarks no dataset MEVIEW<br>
+ <b>09/12/2022</b><br>
+ - Estudo sobre action units
+ <b>16/12/2022</b><br>
+ - Computação de medidas para detetar action units<br>
+ <b>23/12/2022</b><br>
+ - Testes de action units no dataset MEVIEW<br>
+ <b>30/12/2022</b><br>
+ - Natal
+ <b>06/01/2023</b><br>
+ - Escrita do relatório(Capitulo 1/2)
+ <b>13/01/2023</b><br>
+  - Escrita do relatório(Capitulo 2/3)
+ <b>20/01/2023</b><br>
+  - Escrita e revisão do relatório
