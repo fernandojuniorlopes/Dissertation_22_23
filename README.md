@@ -29,10 +29,10 @@
  <b>23/12/2022</b><br>
  - Testes de action units no dataset MEVIEW<br>
  <b>30/12/2022</b><br>
- - Natal
+ - Natal<br>
  <b>06/01/2023</b><br>
- - Escrita do relatório(Capitulo 1/2)
+ - Escrita do relatório(Capitulo 1/2)<br>
  <b>13/01/2023</b><br>
-  - Escrita do relatório(Capitulo 2/3)
+  - Escrita do relatório(Capitulo 2/3)<br>
  <b>20/01/2023</b><br>
-  - Escrita e revisão do relatório
+  - Escrita e revisão do relatório<br>
